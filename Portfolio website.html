@@ -167,6 +167,24 @@ body{
   background:#25D366;
   animation:waPulse 2s ease-in-out infinite;
 }
+.chat-bot-fab{
+  position:fixed;bottom:6.5rem;right:2rem;z-index:200;
+  display:flex;align-items:center;gap:.6rem;
+  padding:.8rem 1.1rem;
+  border-radius:999px;
+  text-decoration:none;
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--border);
+  box-shadow:0 10px 30px rgba(0,0,0,.24);
+  backdrop-filter:blur(16px);
+  transition:transform .25s,box-shadow .25s;
+}
+.chat-bot-fab:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 14px 34px rgba(0,0,0,.3);}
+.chat-bot-icon{font-size:1.1rem;}
+.chat-bot-text{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
+.analytics-card{padding:1rem;border:1px solid var(--border);border-radius:12px;background:var(--surface2);margin-bottom:.8rem;}
+.analytics-card strong{display:block;font-size:1.1rem;color:var(--accent);margin-top:.3rem;}
 @keyframes waPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.8);opacity:0;}}
 
 /* ─── NAV ─── */
@@ -463,6 +481,10 @@ footer{display:flex;justify-content:space-between;align-items:center;padding:2re
   </svg>
   Chat on WhatsApp
   <div class="wa-pulse"></div>
+</a>
+<a class="chat-bot-fab" href="chatbot.html" onclick="trackAnalytics('chat_open');" aria-label="Open personal assistant">
+  <span class="chat-bot-icon">🤖</span>
+  <span class="chat-bot-text">Ask Ambrose</span>
 </a>
 
 <!-- NAV -->
@@ -772,6 +794,21 @@ barEls.forEach(el=>barObs.observe(el));
     <button type="button" class="btn btn-ghost" style="padding:.7rem 1rem;" onclick="closeAdminDashboard()">Close</button>
   </div>
   <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.2rem;">Manage page content and save your changes in browser storage.</p>
+  <div class="analytics-card">
+    <div style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">Site analytics</div>
+    <strong id="analyticsSiteVisits">0</strong>
+    <div style="font-size:.8rem;color:var(--muted);">Total visits</div>
+  </div>
+  <div class="analytics-card">
+    <div style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">Unique visitors</div>
+    <strong id="analyticsUniqueVisitors">0</strong>
+    <div style="font-size:.8rem;color:var(--muted);">Users who have visited</div>
+  </div>
+  <div class="analytics-card">
+    <div style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">Chat sessions</div>
+    <strong id="analyticsChatSessions">0</strong>
+    <div style="font-size:.8rem;color:var(--muted);">Bot opens tracked</div>
+  </div>
   <button onclick="openEditor('hero')">Edit Hero</button>
   <button onclick="openEditor('stats')">Edit Stats</button>
   <button onclick="openEditor('contact')">Edit Contact</button>
@@ -797,6 +834,8 @@ barEls.forEach(el=>barObs.observe(el));
 <script>
 const ADMIN_KEY = 'portfolioAdminData';
 const ADMIN_SESSION_KEY = 'portfolioAdminLoggedIn';
+const ANALYTICS_KEY = 'portfolioAnalyticsData';
+const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
 const defaultAdminData = {
   hero: {
     eyebrow:'IT Professional · Digital Solutions · Operations',
@@ -841,6 +880,50 @@ function getAdminData(){
 function saveAdminData(data){localStorage.setItem(ADMIN_KEY, JSON.stringify(data));}
 function setAdminLoggedIn(value){sessionStorage.setItem(ADMIN_SESSION_KEY, value ? '1':'0');}
 function isAdminLoggedIn(){return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';}
+function loadAnalyticsData(){
+  const raw = localStorage.getItem(ANALYTICS_KEY);
+  if(!raw) return {siteVisits:0, uniqueVisitors:0, chatSessions:0};
+  try{return JSON.parse(raw);}catch{localStorage.removeItem(ANALYTICS_KEY);return {siteVisits:0, uniqueVisitors:0, chatSessions:0};}
+}
+function saveAnalyticsData(data){localStorage.setItem(ANALYTICS_KEY, JSON.stringify(data));}
+function renderAnalytics(){
+  const data = loadAnalyticsData();
+  const visitsEl = document.getElementById('analyticsSiteVisits');
+  const usersEl = document.getElementById('analyticsUniqueVisitors');
+  const chatsEl = document.getElementById('analyticsChatSessions');
+  if(visitsEl) visitsEl.textContent = data.siteVisits;
+  if(usersEl) usersEl.textContent = data.uniqueVisitors;
+  if(chatsEl) chatsEl.textContent = data.chatSessions;
+}
+function trackAnalytics(eventName){
+  const data = loadAnalyticsData();
+  if(eventName === 'page_view'){
+    data.siteVisits += 1;
+    if(!sessionStorage.getItem('portfolioVisited')){
+      data.uniqueVisitors += 1;
+      sessionStorage.setItem('portfolioVisited','1');
+    }
+  }
+  if(eventName === 'chat_open') data.chatSessions += 1;
+  saveAnalyticsData(data);
+  renderAnalytics();
+  if(typeof window.gtag === 'function'){
+    window.gtag('event', eventName, {event_category:'portfolio', event_label: document.title});
+  }
+}
+function initAnalytics(){
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
+  if(GA_MEASUREMENT_ID && GA_MEASUREMENT_ID !== 'G-XXXXXXXXXX'){
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    document.head.appendChild(script);
+    window.gtag('js', new Date());
+    window.gtag('config', GA_MEASUREMENT_ID);
+  }
+  trackAnalytics('page_view');
+}
 function loadPageData(){
   const data = getAdminData();
   document.getElementById('heroEyebrow').textContent = data.hero.eyebrow;
@@ -1041,6 +1124,7 @@ function saveEditor(event){
   closeEditor();
 }
 document.getElementById('adminEditorForm').addEventListener('submit', saveEditor);
+initAnalytics();
 loadPageData();
 openAdminIfNeeded();
 </script>

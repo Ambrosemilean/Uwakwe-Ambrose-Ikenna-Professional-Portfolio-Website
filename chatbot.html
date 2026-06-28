@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambrose AI Assistant</title>
+  <style>
+    :root {
+      --bg: #060608;
+      --surface: #101018;
+      --surface2: #181823;
+      --border: rgba(255,255,255,.08);
+      --text: #f5f1e8;
+      --muted: #9ca3af;
+      --accent: #7c6dfa;
+      --accent2: #6dfac8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Outfit, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--bg), #0d1220);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .shell {
+      width: min(920px, 100%);
+      background: rgba(16,16,24,.9);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(20px);
+    }
+    .header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent2)); font-size: 22px; }
+    .title { font-weight: 700; font-size: 1.05rem; }
+    .subtitle { font-size: .84rem; color: var(--muted); margin-top: 2px; }
+    .back-btn { text-decoration: none; color: var(--text); background: var(--surface2); border: 1px solid var(--border); padding: 10px 14px; border-radius: 999px; font-size: .88rem; }
+    .chat-area { padding: 20px; height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .msg { max-width: 80%; padding: 12px 14px; border-radius: 16px; line-height: 1.55; font-size: .95rem; }
+    .bot { background: var(--surface2); align-self: flex-start; border-bottom-left-radius: 6px; }
+    .user { background: linear-gradient(135deg, var(--accent), #5e57c7); align-self: flex-end; border-bottom-right-radius: 6px; }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 16px; }
+    .quick-actions button { border: 1px solid var(--border); background: var(--surface2); color: var(--text); padding: 8px 12px; border-radius: 999px; cursor: pointer; font-size: .8rem; }
+    .composer { display: flex; gap: 10px; padding: 16px 20px 20px; border-top: 1px solid var(--border); }
+    .composer input { flex: 1; padding: 12px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); }
+    .composer button { border: 0; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; padding: 12px 16px; border-radius: 999px; font-weight: 700; cursor: pointer; }
+    @media (max-width: 700px) { .msg { max-width: 94%; } body { padding: 10px; } .header { padding: 16px; } .composer { padding: 12px 16px 16px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="header">
+      <div class="brand">
+        <div class="avatar">🤖</div>
+        <div>
+          <div class="title">Ambrose AI Assistant</div>
+          <div class="subtitle">Ask about my background, skills, experience, and contact details</div>
+        </div>
+      </div>
+      <a class="back-btn" href="Portfolio website.html">← Portfolio</a>
+    </div>
+
+    <div class="chat-area" id="chatArea"></div>
+
+    <div class="quick-actions">
+      <button data-q="Who are you?">Who are you?</button>
+      <button data-q="What skills do you have?">What skills do you have?</button>
+      <button data-q="What is your experience?">What is your experience?</button>
+      <button data-q="How can I contact you?">How can I contact you?</button>
+    </div>
+
+    <div class="composer">
+      <input id="userInput" type="text" placeholder="Type your question here..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatArea = document.getElementById('chatArea');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const fallbackCsv = `intent,keywords,answer
+name,who are you;your name;full name;identity,"I am Uwakwe Ambrose Ikenna, a Computer Science graduate and IT professional focused on digital solutions, operations, and customer support."
+role,what do you do;your role;profession;job,"I work at the intersection of IT support, operations management, administrative support, and digital solutions."
+experience,experience;years;worked;background,"I have several years of experience in customer support, office administration, operations, and service delivery across different organizations."
+skills,skills;strengths;abilities;expertise,"My core strengths include customer support, IT troubleshooting, office administration, WordPress/web management, social media management, graphics, video editing, and documentation."
+education,education;school;university;degree,"I hold a B.Sc. in Computer Science from the University of Port Harcourt and have completed several professional certifications in digital marketing, AI, Python, and ethical hacking."
+certifications,certifications;courses;certificates;training,"My certifications include Digital Marketing, Ethical Hacking, Python Programming, Artificial Intelligence, and Social Media Marketing."
+contact,contact;email;phone;whatsapp;linkedin,"You can reach me by email at ikennaambrose60@gmail.com, WhatsApp at +234 906 703 7543, or through LinkedIn using the link on my portfolio."
+location,location;where are you;address;residence,"I am based in Akwakuma, Owerri, Imo State, Nigeria."
+projects,projects;portfolio;works;examples,"My portfolio highlights my experience in IT support, operations, administration, digital communication, and online service management."
+availability,available;hire;work with you;freelance,"I am open to full-time roles, freelance contracts, consulting opportunities, and collaborative projects in IT, operations, digital marketing, and administration."
+services,services;help;can you help;what can you do,"I can help with IT support, operations coordination, administrative tasks, digital content, customer support, and professional communication."
+`;
+    let knowledge = [];
+
+    function addMessage(text, type = 'bot') {
+      const el = document.createElement('div');
+      el.className = `msg ${type}`;
+      el.textContent = text;
+      chatArea.appendChild(el);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let value = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            value += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === ',' && !inQuotes) {
+          row.push(value);
+          value = '';
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && next === '\n') i++;
+          row.push(value);
+          if (row.some(cell => cell.length)) rows.push(row);
+          row = [];
+          value = '';
+        } else {
+          value += ch;
+        }
+      }
+
+      if (value.length || row.length) {
+        row.push(value);
+        if (row.some(cell => cell.length)) rows.push(row);
+      }
+
+      return rows.slice(1).map(columns => ({
+        intent: columns[0] || '',
+        keywords: (columns[1] || '').split(';').map(k => k.trim().toLowerCase()).filter(Boolean),
+        answer: columns[2] || ''
+      })).filter(item => item.answer);
+    }
+
+    async function loadKnowledge() {
+      try {
+        const response = await fetch('about_me_data.csv');
+        if (!response.ok) throw new Error('CSV load failed');
+        const text = await response.text();
+        knowledge = parseCsv(text);
+      } catch (error) {
+        knowledge = parseCsv(fallbackCsv);
+      }
+    }
+
+    function findAnswer(question) {
+      const q = question.toLowerCase();
+      let best = null;
+      let bestScore = 0;
+
+      for (const item of knowledge) {
+        let score = 0;
+        for (const keyword of item.keywords) {
+          if (q.includes(keyword)) score += 2;
+        }
+        if (q.includes(item.intent)) score += 3;
+        if (score > bestScore) {
+          bestScore = score;
+          best = item;
+        }
+      }
+
+      if (bestScore > 0) {
+        return best.answer;
+      }
+
+      return 'I can answer questions about my background, skills, experience, certifications, location, and contact details. Try asking: who are you, what skills do you have, or how can I contact you?';
+    }
+
+    function handleSend() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      userInput.value = '';
+      const reply = findAnswer(text);
+      setTimeout(() => addMessage(reply, 'bot'), 220);
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    userInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') handleSend();
+    });
+
+    document.querySelectorAll('[data-q]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        userInput.value = btn.getAttribute('data-q');
+        handleSend();
+      });
+    });
+
+    addMessage('Hello! I am Ambrose AI, your personal portfolio assistant. Ask me anything about Uwakwe Ambrose Ikenna.', 'bot');
+    loadKnowledge();
+  </script>
+</body>
+</html>
