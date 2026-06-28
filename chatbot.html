@@ -93,6 +93,7 @@
     const chatArea = document.getElementById('chatArea');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    const CHATBOT_DB_KEY = 'ambroseChatbotDatabase';
     const fallbackCsv = `intent,keywords,answer
 name,who are you;your name;full name;identity,"I am Uwakwe Ambrose Ikenna, a Computer Science graduate and IT professional focused on digital solutions, operations, and customer support."
 role,what do you do;your role;profession;job,"I work at the intersection of IT support, operations management, administrative support, and digital solutions."
@@ -194,12 +195,29 @@ services,services;help;can you help;what can you do,"I can help with IT support,
       return 'I can answer questions about my background, skills, experience, certifications, location, and contact details. Try asking: who are you, what skills do you have, or how can I contact you?';
     }
 
+    function getChatbotDatabase(){
+      const raw = localStorage.getItem(CHATBOT_DB_KEY);
+      if(!raw) return {faqs:[], history:[]};
+      try{return JSON.parse(raw);}catch{return {faqs:[], history:[]};}
+    }
+    function saveChatbotDatabase(data){
+      localStorage.setItem(CHATBOT_DB_KEY, JSON.stringify(data));
+    }
+    function persistChat(question, answer){
+      const data = getChatbotDatabase();
+      data.faqs.unshift({id:Date.now(), question, answer, createdAt:new Date().toLocaleString()});
+      data.history.unshift({id:Date.now()+1, question, answer, createdAt:new Date().toLocaleString()});
+      data.faqs = data.faqs.slice(0,20);
+      data.history = data.history.slice(0,50);
+      saveChatbotDatabase(data);
+    }
     function handleSend() {
       const text = userInput.value.trim();
       if (!text) return;
       addMessage(text, 'user');
       userInput.value = '';
       const reply = findAnswer(text);
+      persistChat(text, reply);
       setTimeout(() => addMessage(reply, 'bot'), 220);
     }
 

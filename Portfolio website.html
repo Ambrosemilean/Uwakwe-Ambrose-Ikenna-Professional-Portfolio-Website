@@ -185,13 +185,19 @@ body{
 .chat-bot-text{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
 .analytics-card{padding:1rem;border:1px solid var(--border);border-radius:12px;background:var(--surface2);margin-bottom:.8rem;}
 .analytics-card strong{display:block;font-size:1.1rem;color:var(--accent);margin-top:.3rem;}
+.faq-form{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.8rem;}
+.faq-form input,.faq-form textarea{padding:.8rem .9rem;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:10px;}
+.faq-form button{padding:.8rem 1rem;border:none;background:var(--accent);color:white;border-radius:10px;cursor:pointer;}
+.faq-list{display:flex;flex-direction:column;gap:.6rem;max-height:220px;overflow:auto;padding-right:.2rem;}
+.faq-item{padding:.8rem;border:1px solid var(--border);border-radius:10px;background:var(--surface2);font-size:.86rem;}
+.faq-item strong{display:block;margin-bottom:.3rem;color:var(--text);} 
 @keyframes waPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.8);opacity:0;}}
 
 /* ─── NAV ─── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:1.4rem 5rem;
+  padding:1rem 3rem;
   background:var(--nav-bg);
   backdrop-filter:blur(24px);
   border-bottom:1px solid var(--border);
@@ -199,11 +205,12 @@ nav{
 }
 .nav-logo{font-family:"Bebas Neue",sans-serif;font-size:1.5rem;letter-spacing:.12em;color:var(--text);text-decoration:none;}
 .nav-logo span{color:var(--accent);}
-.nav-links{display:flex;gap:2.5rem;list-style:none;}
-.nav-links a{font-size:.75rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;position:relative;}
-.nav-links a::after{content:"";position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--accent);transition:width .3s;}
+.nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center;}
+.nav-links a{font-size:.75rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;position:relative;display:block;padding:.4rem 0;}
+.nav-links a::after{content:"";position:absolute;bottom:-2px;left:0;width:0;height:1px;background:var(--accent);transition:width .3s;}
 .nav-links a:hover{color:var(--text);}
 .nav-links a:hover::after{width:100%;}
+.nav-toggle{display:none;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:.55rem .8rem;border-radius:999px;cursor:pointer;}
 .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3);box-shadow:0 0 10px var(--accent3);animation:blink 2s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
 
@@ -212,8 +219,8 @@ nav{
   min-height:100vh;
   display:grid;grid-template-columns:1fr 480px;
   align-items:center;
-  padding:8rem 5rem 4rem;
-  gap:5rem;
+  padding:7rem 3rem 3rem;
+  gap:4rem;
   position:relative;z-index:1;overflow:hidden;
 }
 .hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
@@ -355,7 +362,7 @@ cursor:pointer;
 .stat-d{font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
 
 /* ─── SECTIONS ─── */
-.section{position:relative;z-index:1;padding:7rem 5rem;border-top:1px solid var(--border);}
+.section{position:relative;z-index:1;padding:5.5rem 3rem;border-top:1px solid var(--border);}
 .sec-tag{display:inline-flex;align-items:center;gap:.75rem;font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;}
 .sec-tag::before{content:"";width:28px;height:1px;background:var(--accent);}
 h2.sec-title{font-family:"Bebas Neue",sans-serif;font-size:clamp(2.5rem,5vw,5rem);letter-spacing:.06em;line-height:1;color:var(--text);margin-bottom:4rem;}
@@ -431,7 +438,7 @@ h2.sec-title{font-family:"Bebas Neue",sans-serif;font-size:clamp(2.5rem,5vw,5rem
 .c-value{font-size:.88rem;color:var(--text);font-weight:400;}
 
 /* ─── FOOTER ─── */
-footer{display:flex;justify-content:space-between;align-items:center;padding:2rem 5rem;border-top:1px solid var(--border);position:relative;z-index:1;}
+footer{display:flex;justify-content:space-between;align-items:center;padding:2rem 3rem;border-top:1px solid var(--border);position:relative;z-index:1;}
 .footer-l{font-size:.75rem;color:var(--muted);}
 .footer-r{font-family:"Bebas Neue",sans-serif;font-size:1rem;letter-spacing:.12em;color:var(--muted);}
 
@@ -444,7 +451,10 @@ footer{display:flex;justify-content:space-between;align-items:center;padding:2re
   .hero{grid-template-columns:1fr;padding:7rem 1.5rem 3rem;gap:3rem;}
   .hero-photo-wrap{max-width:320px;margin:0 auto;}
   nav{padding:1rem 1.5rem;}
-  .nav-links{display:none;}
+  .nav-toggle{display:inline-flex;align-items:center;justify-content:center;}
+  .nav-links{display:none;position:absolute;top:calc(100% + .6rem);right:1.5rem;flex-direction:column;align-items:flex-start;gap:.8rem;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:16px;min-width:180px;box-shadow:0 10px 24px rgba(0,0,0,.25);}
+  .nav-links.active{display:flex;}
+  .nav-links a{padding:.25rem 0;}
   .section{padding:5rem 1.5rem;}
   .skills-layout{grid-template-columns:1fr;gap:3rem;}
   .contact-inner{grid-template-columns:1fr;gap:3rem;}
@@ -490,12 +500,13 @@ footer{display:flex;justify-content:space-between;align-items:center;padding:2re
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">UWAKWE<span>.</span>A.I</a>
-  <ul class="nav-links">
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#education">Education</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#" onclick="openAdmin(); return false;">Admin</a></li>
+  <button class="nav-toggle" type="button" onclick="toggleNavMenu()" aria-label="Toggle navigation">☰</button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#skills" onclick="closeNavMenu();">Skills</a></li>
+    <li><a href="#experience" onclick="closeNavMenu();">Experience</a></li>
+    <li><a href="#education" onclick="closeNavMenu();">Education</a></li>
+    <li><a href="#contact" onclick="closeNavMenu();">Contact</a></li>
+    <li><a href="#" onclick="openAdmin(); closeNavMenu(); return false;">Admin</a></li>
   </ul>
   <div class="nav-dot"></div>
 </nav>
@@ -809,6 +820,23 @@ barEls.forEach(el=>barObs.observe(el));
     <strong id="analyticsChatSessions">0</strong>
     <div style="font-size:.8rem;color:var(--muted);">Bot opens tracked</div>
   </div>
+  <div class="analytics-card">
+    <div style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">Chatbot database</div>
+    <strong id="chatbotFaqCount">0</strong>
+    <div style="font-size:.8rem;color:var(--muted);">Saved FAQ entries</div>
+  </div>
+  <form id="faqForm" class="faq-form" onsubmit="saveFaqEntry(event)">
+    <input id="faqQuestion" type="text" placeholder="FAQ question" required>
+    <textarea id="faqAnswer" rows="3" placeholder="FAQ answer" required></textarea>
+    <button type="submit">Save FAQ</button>
+  </form>
+  <div id="faqList" class="faq-list"></div>
+  <div class="analytics-card" style="margin-top:1rem;">
+    <div style="font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);">Chat history</div>
+    <strong id="chatbotHistoryCount">0</strong>
+    <div style="font-size:.8rem;color:var(--muted);">Recent conversations</div>
+  </div>
+  <div id="chatHistoryList" class="faq-list"></div>
   <button onclick="openEditor('hero')">Edit Hero</button>
   <button onclick="openEditor('stats')">Edit Stats</button>
   <button onclick="openEditor('contact')">Edit Contact</button>
@@ -835,6 +863,7 @@ barEls.forEach(el=>barObs.observe(el));
 const ADMIN_KEY = 'portfolioAdminData';
 const ADMIN_SESSION_KEY = 'portfolioAdminLoggedIn';
 const ANALYTICS_KEY = 'portfolioAnalyticsData';
+const CHATBOT_DB_KEY = 'ambroseChatbotDatabase';
 const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
 const defaultAdminData = {
   hero: {
@@ -923,6 +952,56 @@ function initAnalytics(){
     window.gtag('config', GA_MEASUREMENT_ID);
   }
   trackAnalytics('page_view');
+}
+function getChatbotDatabase(){
+  const raw = localStorage.getItem(CHATBOT_DB_KEY);
+  if(!raw) return {faqs:[], history:[]};
+  try{return JSON.parse(raw);}catch{localStorage.removeItem(CHATBOT_DB_KEY);return {faqs:[], history:[]};}
+}
+function saveChatbotDatabase(data){localStorage.setItem(CHATBOT_DB_KEY, JSON.stringify(data));}
+function renderChatbotAdmin(){
+  const data = getChatbotDatabase();
+  const faqCount = document.getElementById('chatbotFaqCount');
+  const historyCount = document.getElementById('chatbotHistoryCount');
+  const faqList = document.getElementById('faqList');
+  const historyList = document.getElementById('chatHistoryList');
+  if(faqCount) faqCount.textContent = data.faqs.length;
+  if(historyCount) historyCount.textContent = data.history.length;
+  if(faqList){
+    faqList.innerHTML = data.faqs.length ? data.faqs.slice(0,8).map(item => `<div class="faq-item"><strong>${escapeHtml(item.question)}</strong>${escapeHtml(item.answer)}</div>`).join('') : '<div class="faq-item">No FAQ entries yet.</div>';
+  }
+  if(historyList){
+    historyList.innerHTML = data.history.length ? data.history.slice(0,8).map(item => `<div class="faq-item"><strong>${escapeHtml(item.question)}</strong>${escapeHtml(item.answer)}</div>`).join('') : '<div class="faq-item">No chat history yet.</div>';
+  }
+}
+function saveFaqEntry(event){
+  event.preventDefault();
+  const question = document.getElementById('faqQuestion').value.trim();
+  const answer = document.getElementById('faqAnswer').value.trim();
+  if(!question || !answer) return;
+  const data = getChatbotDatabase();
+  data.faqs.unshift({id:Date.now(), question, answer, createdAt:new Date().toLocaleString()});
+  data.faqs = data.faqs.slice(0,20);
+  saveChatbotDatabase(data);
+  document.getElementById('faqForm').reset();
+  renderChatbotAdmin();
+}
+function storeChatInteraction(question, answer){
+  const data = getChatbotDatabase();
+  data.faqs.unshift({id:Date.now(), question, answer, createdAt:new Date().toLocaleString()});
+  data.history.unshift({id:Date.now()+1, question, answer, createdAt:new Date().toLocaleString()});
+  data.faqs = data.faqs.slice(0,20);
+  data.history = data.history.slice(0,50);
+  saveChatbotDatabase(data);
+  renderChatbotAdmin();
+}
+function toggleNavMenu(){
+  const links = document.getElementById('navLinks');
+  if(links) links.classList.toggle('active');
+}
+function closeNavMenu(){
+  const links = document.getElementById('navLinks');
+  if(links) links.classList.remove('active');
 }
 function loadPageData(){
   const data = getAdminData();
@@ -1124,8 +1203,10 @@ function saveEditor(event){
   closeEditor();
 }
 document.getElementById('adminEditorForm').addEventListener('submit', saveEditor);
+document.addEventListener('click', (event) => { if (!event.target.closest('nav')) closeNavMenu(); });
 initAnalytics();
 loadPageData();
+renderChatbotAdmin();
 openAdminIfNeeded();
 </script>
 </body>
