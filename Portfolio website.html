@@ -649,7 +649,7 @@ function polar(i,r){const a=(i/N)*Math.PI*2-Math.PI/2;return{x:cx2+r*Math.cos(a)
   const pts2=skills.map((_,i)=>polar(i,maxR*f));
   const d="M"+pts2.map(p=>p.x+","+p.y).join("L")+"Z";
   const path=document.createElementNS("http://www.w3.org/2000/svg","path");
-  path.setAttribute("d",d);path.setAttribute("fill","none");
+  path.setAttribute("d",d);path.setAttribute("fill" ,"none");
   path.setAttribute("stroke",f===1?"rgba(124,109,250,.3)":"rgba(255,255,255,.05)");path.setAttribute("stroke-width","1");
   svgEl.appendChild(path);
 });
