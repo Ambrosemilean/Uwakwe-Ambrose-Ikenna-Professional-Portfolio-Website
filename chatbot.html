@@ -171,10 +171,53 @@ services,services;help;can you help;what can you do,"I can help with IT support,
       }
     }
 
+    function normalizeText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function tokenize(value) {
+      return normalizeText(value).split(' ').filter(Boolean);
+    }
+
     function findAnswer(question) {
-      const q = question.toLowerCase();
-      let best = null;
-      let bestScore = 0;
+      const q = normalizeText(question);
+      const db = getChatbotDatabase();
+      const savedEntries = [...(db.faqs || []), ...(db.history || [])];
+
+      let bestSaved = null;
+      let bestSavedScore = 0;
+
+      savedEntries.forEach((entry) => {
+        if (!entry || !entry.question) return;
+        const stored = normalizeText(entry.question);
+        const qTokens = tokenize(q);
+        const storedTokens = tokenize(stored);
+        let score = 0;
+
+        if (stored === q) score = 100;
+        else if (stored.includes(q) || q.includes(stored)) score = 80;
+        else {
+          const overlap = qTokens.filter((token) => storedTokens.includes(token)).length;
+          score = overlap * 12;
+          if (overlap > 0 && qTokens.length > 1) score += 6;
+        }
+
+        if (score > bestSavedScore) {
+          bestSavedScore = score;
+          bestSaved = entry;
+        }
+      });
+
+      if (bestSavedScore >= 16 && bestSaved && bestSaved.answer) {
+        return bestSaved.answer;
+      }
+
+      let bestKnowledge = null;
+      let bestKnowledgeScore = 0;
 
       for (const item of knowledge) {
         let score = 0;
@@ -182,14 +225,14 @@ services,services;help;can you help;what can you do,"I can help with IT support,
           if (q.includes(keyword)) score += 2;
         }
         if (q.includes(item.intent)) score += 3;
-        if (score > bestScore) {
-          bestScore = score;
-          best = item;
+        if (score > bestKnowledgeScore) {
+          bestKnowledgeScore = score;
+          bestKnowledge = item;
         }
       }
 
-      if (bestScore > 0) {
-        return best.answer;
+      if (bestKnowledgeScore > 0 && bestKnowledge) {
+        return bestKnowledge.answer;
       }
 
       return 'I can answer questions about my background, skills, experience, certifications, location, and contact details. Try asking: who are you, what skills do you have, or how can I contact you?';

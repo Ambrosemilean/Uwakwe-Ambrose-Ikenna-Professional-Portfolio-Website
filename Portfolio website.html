@@ -188,9 +188,12 @@ body{
 .faq-form{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.8rem;}
 .faq-form input,.faq-form textarea{padding:.8rem .9rem;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:10px;}
 .faq-form button{padding:.8rem 1rem;border:none;background:var(--accent);color:white;border-radius:10px;cursor:pointer;}
-.faq-list{display:flex;flex-direction:column;gap:.6rem;max-height:220px;overflow:auto;padding-right:.2rem;}
+.faq-list{display:flex;flex-direction:column;gap:.6rem;max-height:260px;overflow:auto;padding-right:.2rem;}
 .faq-item{padding:.8rem;border:1px solid var(--border);border-radius:10px;background:var(--surface2);font-size:.86rem;}
 .faq-item strong{display:block;margin-bottom:.3rem;color:var(--text);} 
+.faq-actions{display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap;}
+.faq-actions button{padding:.35rem .55rem;border:none;border-radius:999px;cursor:pointer;font-size:.72rem;background:var(--accent);color:white;}
+.faq-actions .remove{background:var(--accent2);color:#04231a;}
 @keyframes waPulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.8);opacity:0;}}
 
 /* ─── NAV ─── */
@@ -792,8 +795,8 @@ barEls.forEach(el=>barObs.observe(el));
 <div id="adminLogin" class="admin-modal">
   <div class="admin-box">
     <h2>Administrator Login</h2>
-    <input type="email" id="adminEmail" placeholder="Email" value="admin@example.com">
-    <input type="password" id="adminPassword" placeholder="Password">
+    <input type="email" id="adminEmail" placeholder="Email" value="ikennaambrose2@gmail.com">
+    <input type="password" id="adminPassword" placeholder="Password" autocomplete="current-password">
     <button onclick="adminLogin()">Login</button>
     <button type="button" class="btn btn-ghost" onclick="closeAdmin()">Close</button>
     <p id="adminError" style="color:var(--accent2);font-size:.9rem;"></p>
@@ -959,6 +962,9 @@ function getChatbotDatabase(){
   try{return JSON.parse(raw);}catch{localStorage.removeItem(CHATBOT_DB_KEY);return {faqs:[], history:[]};}
 }
 function saveChatbotDatabase(data){localStorage.setItem(CHATBOT_DB_KEY, JSON.stringify(data));}
+function makeToken(){
+  return 'Amb' + Math.random().toString(36).slice(2,8).toUpperCase();
+}
 function renderChatbotAdmin(){
   const data = getChatbotDatabase();
   const faqCount = document.getElementById('chatbotFaqCount');
@@ -968,10 +974,29 @@ function renderChatbotAdmin(){
   if(faqCount) faqCount.textContent = data.faqs.length;
   if(historyCount) historyCount.textContent = data.history.length;
   if(faqList){
-    faqList.innerHTML = data.faqs.length ? data.faqs.slice(0,8).map(item => `<div class="faq-item"><strong>${escapeHtml(item.question)}</strong>${escapeHtml(item.answer)}</div>`).join('') : '<div class="faq-item">No FAQ entries yet.</div>';
+    faqList.innerHTML = data.faqs.length ? data.faqs.map(item => `
+      <div class="faq-item">
+        <strong>${escapeHtml(item.question)}</strong>
+        <div>${escapeHtml(item.answer)}</div>
+        <div class="faq-actions">
+          <button type="button" onclick="editFaqEntry(${item.id})">Edit</button>
+          <button type="button" class="remove" onclick="removeFaqEntry(${item.id})">Remove</button>
+        </div>
+      </div>
+    `).join('') : '<div class="faq-item">No FAQ entries yet.</div>';
   }
   if(historyList){
-    historyList.innerHTML = data.history.length ? data.history.slice(0,8).map(item => `<div class="faq-item"><strong>${escapeHtml(item.question)}</strong>${escapeHtml(item.answer)}</div>`).join('') : '<div class="faq-item">No chat history yet.</div>';
+    historyList.innerHTML = data.history.length ? data.history.map(item => `
+      <div class="faq-item">
+        <strong>${escapeHtml(item.token || 'No token')}</strong>
+        <div><b>User:</b> ${escapeHtml(item.question)}</div>
+        <div><b>Bot:</b> ${escapeHtml(item.answer)}</div>
+        <div class="faq-actions">
+          <button type="button" onclick="editHistoryEntry(${item.id})">Edit</button>
+          <button type="button" class="remove" onclick="removeHistoryEntry(${item.id})">Remove</button>
+        </div>
+      </div>
+    `).join('') : '<div class="faq-item">No chat history yet.</div>';
   }
 }
 function saveFaqEntry(event){
@@ -986,10 +1011,49 @@ function saveFaqEntry(event){
   document.getElementById('faqForm').reset();
   renderChatbotAdmin();
 }
+function editFaqEntry(id){
+  const data = getChatbotDatabase();
+  const item = data.faqs.find(entry => entry.id === id);
+  if(!item) return;
+  const question = prompt('Edit FAQ question', item.question);
+  if(question === null) return;
+  const answer = prompt('Edit FAQ answer', item.answer);
+  if(answer === null) return;
+  item.question = question.trim() || item.question;
+  item.answer = answer.trim() || item.answer;
+  saveChatbotDatabase(data);
+  renderChatbotAdmin();
+}
+function removeFaqEntry(id){
+  const data = getChatbotDatabase();
+  data.faqs = data.faqs.filter(entry => entry.id !== id);
+  saveChatbotDatabase(data);
+  renderChatbotAdmin();
+}
+function editHistoryEntry(id){
+  const data = getChatbotDatabase();
+  const item = data.history.find(entry => entry.id === id);
+  if(!item) return;
+  const question = prompt('Edit chat question', item.question);
+  if(question === null) return;
+  const answer = prompt('Edit chat answer', item.answer);
+  if(answer === null) return;
+  item.question = question.trim() || item.question;
+  item.answer = answer.trim() || item.answer;
+  saveChatbotDatabase(data);
+  renderChatbotAdmin();
+}
+function removeHistoryEntry(id){
+  const data = getChatbotDatabase();
+  data.history = data.history.filter(entry => entry.id !== id);
+  saveChatbotDatabase(data);
+  renderChatbotAdmin();
+}
 function storeChatInteraction(question, answer){
   const data = getChatbotDatabase();
+  const token = makeToken();
   data.faqs.unshift({id:Date.now(), question, answer, createdAt:new Date().toLocaleString()});
-  data.history.unshift({id:Date.now()+1, question, answer, createdAt:new Date().toLocaleString()});
+  data.history.unshift({id:Date.now()+1, token, question, answer, createdAt:new Date().toLocaleString()});
   data.faqs = data.faqs.slice(0,20);
   data.history = data.history.slice(0,50);
   saveChatbotDatabase(data);
@@ -1152,7 +1216,7 @@ function adminLogin(){
   const email = document.getElementById('adminEmail').value.trim();
   const password = document.getElementById('adminPassword').value.trim();
   const error = document.getElementById('adminError');
-  if(email === 'admin@example.com' && password === '123456'){
+  if(email === 'ikennaambrose2@gmail.com' && password === 'Ambrosemilean'){
     setAdminLoggedIn(true);
     closeAdmin();
     document.getElementById('adminDashboard').style.display = 'block';
